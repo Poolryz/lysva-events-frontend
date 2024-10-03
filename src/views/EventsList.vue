@@ -7,29 +7,30 @@
 				<!-- Поле для поиска -->
 				<input
 					v-model="searchQuery"
-					@input="fetchEvents"
+					@input="updateSearch"
 					class="border rounded p-2 mb-4 w-full"
 					placeholder="Поиск мероприятий"
 					type="text"
 				/>
 
-				<!-- Переключатель для сортировки -->
+				<!-- Переключатель сортировки -->
 				<div class="mb-4">
-					<label for="sortOrder" class="mr-2">Сортировка:</label>
+					<label class="mr-2">Сортировка:</label>
 					<select
 						v-model="sortOrder"
-						@change="sortEvents"
+						@change="updateSortOrder"
 						class="border p-2 rounded"
 					>
-						<option value="asc">По возрастанию даты</option>
-						<option value="desc">По убыванию даты</option>
+						<option value="asc">По возрастанию (ближайшие)</option>
+						<option value="desc">По убыванию (поздние)</option>
 					</select>
 				</div>
 
-				<div v-if="events.length">
-					<ul class="flex justify-between flex-wrap font">
+				<!-- Список мероприятий -->
+				<div v-if="filteredEvents.length">
+					<ul class="flex justify-betwen flex-wrap font">
 						<li
-							v-for="event in events"
+							v-for="event in filteredEvents"
 							:key="event._id"
 							class="w-1/5 m-1 flex flex-col items-center"
 						>
@@ -57,48 +58,15 @@
 </template>
 
 <script>
-	import axios from "axios";
+	import { mapState, mapGetters, mapMutations } from "vuex";
 
 	export default {
-		data() {
-			return {
-				events: [],
-				searchQuery: "", // Поле для поиска
-				sortOrder: "asc", // По умолчанию сортировка по возрастанию
-			};
-		},
-		async created() {
-			// Загружаем мероприятия при загрузке компонента
-			await this.fetchEvents();
-			this.sortEvents(); // Сортируем после загрузки
+		computed: {
+			...mapState(["searchQuery", "sortOrder"]),
+			...mapGetters(["filteredEvents"]),
 		},
 		methods: {
-			// Получение мероприятий с фильтрацией
-			async fetchEvents() {
-				try {
-					const params = this.searchQuery ? { search: this.searchQuery } : {};
-					const response = await axios.get("http://localhost:3000/events", {
-						params,
-					});
-					this.events = response.data;
-					this.sortEvents(); // Сортируем после получения данных
-				} catch (error) {
-					console.error("Ошибка при получении мероприятий:", error);
-				}
-			},
-			// Функция сортировки мероприятий в зависимости от выбранного значения
-			sortEvents() {
-				this.events.sort((a, b) => {
-					const dateA = new Date(a.date);
-					const dateB = new Date(b.date);
-					if (this.sortOrder === "asc") {
-						return dateA - dateB; // По возрастанию
-					} else {
-						return dateB - dateA; // По убыванию
-					}
-				});
-			},
-			// Функция форматирования даты
+			...mapMutations(["SET_SEARCH_QUERY", "SET_SORT_ORDER"]),
 			formatDate(dateString) {
 				const date = new Date(dateString);
 				return date.toLocaleDateString("ru-RU", {
@@ -107,6 +75,15 @@
 					year: "numeric",
 				});
 			},
+			updateSearch(event) {
+				this.SET_SEARCH_QUERY(event.target.value);
+			},
+			updateSortOrder(event) {
+				this.SET_SORT_ORDER(event.target.value);
+			},
+		},
+		created() {
+			this.$store.dispatch("fetchEvents");
 		},
 	};
 </script>
