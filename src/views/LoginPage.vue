@@ -41,10 +41,14 @@
 						login: this.login,
 						password: this.password,
 					});
-
-					// Сохраняем токен на клиенте
-					const token = response.data.token;
-					localStorage.setItem("token", token);
+					if (response.data.message) {
+						const message = response.data.message;
+						alert(message);
+					} else {
+						// Сохраняем токен на клиенте
+						const token = response.data.token; // Здесь ты получаешь токен от сервера
+						localStorage.setItem("token", token);
+					}
 
 					// Сбросить форму
 					this.login = "";

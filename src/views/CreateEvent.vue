@@ -59,13 +59,26 @@
 		methods: {
 			async createEvent() {
 				try {
-					await axios.post("http://localhost:3000/events", {
-						title: this.title,
-						description: this.description,
-						date: this.date,
-						location: this.location,
-						createdBy: "user", // Заменить на реальное значение
-					});
+					const token = localStorage.getItem("token"); // Получаем токен из localStorage
+					if (!token) {
+						throw new Error("Токен не найден. Авторизуйтесь заново.");
+					}
+
+					await axios.post(
+						"http://localhost:3000/events",
+						{
+							title: this.title,
+							description: this.description,
+							date: this.date,
+							location: this.location,
+							createdBy: "user", // Или используй реального пользователя
+						},
+						{
+							headers: {
+								Authorization: `Bearer ${token}`, // Отправляем токен в заголовке
+							},
+						},
+					);
 
 					// Сбросить форму
 					this.title = "";
@@ -82,6 +95,7 @@
 					}, 3000);
 				} catch (error) {
 					console.error("Ошибка при создании мероприятия:", error);
+					alert("Ошибка! Возможно, вы не авторизованы.");
 				}
 			},
 		},
