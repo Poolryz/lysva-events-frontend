@@ -6,6 +6,9 @@
 					<router-link class="nav-link" to="/">Все мероприятия</router-link> |
 					<router-link class="nav-link" to="/create"
 						>Создать мероприятие</router-link
+					>|
+					<router-link class="nav-link" to="/login"
+						>Войти как редактор</router-link
 					>
 				</nav>
 			</div>
