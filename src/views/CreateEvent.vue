@@ -53,6 +53,7 @@
 				description: "",
 				date: "",
 				location: "",
+				userId: "",
 				showSuccessMessage: false, // Показывать или нет уведомление
 			};
 		},
@@ -65,13 +66,14 @@
 					}
 
 					await axios.post(
-						"http://localhost:3000/events",
+						//"http://localhost:3000/events",
+						"http://176.32.33.100:3000/events",
 						{
 							title: this.title,
 							description: this.description,
 							date: this.date,
 							location: this.location,
-							createdBy: "user", // Или используй реального пользователя
+							userId: JSON.parse(atob(token.split(".")[1])).userId, // ID пользователя
 						},
 						{
 							headers: {

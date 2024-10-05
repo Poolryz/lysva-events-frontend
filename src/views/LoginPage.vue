@@ -37,7 +37,8 @@
 			async loginSubmit() {
 				try {
 					// Отправляем запрос на сервер с логином и паролем
-					const response = await axios.post("http://localhost:3000/login", {
+					//const response = await axios.post("http://localhost:3000/login", {
+					const response = await axios.post("http://176.32.33.100:3000/login", {
 						login: this.login,
 						password: this.password,
 					});

@@ -9,7 +9,7 @@
 		</button>
 
 		<!-- Отображаем кнопки только если текущий пользователь является автором мероприятия -->
-		<div v-if="isCreator">
+		<div v-if="userId">
 			<button
 				@click="goToEdit"
 				class="bg-yellow-500 text-white p-2 rounded mr-2"
@@ -34,13 +34,14 @@
 			const event = ref({});
 			const route = useRoute();
 			const router = useRouter();
-			const isCreator = ref(false); // Проверка, является ли текущий пользователь автором
+			const userId = ref(false); // Проверка, является ли текущий пользователь автором
 
 			const getEvent = async () => {
 				const eventId = route.params.id; // Получаем ID из параметров маршрута
 				try {
 					const response = await axios.get(
-						`http://localhost:3000/events/${eventId}`,
+						//`http://localhost:3000/events/${eventId}`,
+						`http://176.32.33.100/events/${eventId}`,
 						{
 							headers: {
 								Authorization: `Bearer ${localStorage.getItem("token")}`, // Отправляем токен
@@ -50,10 +51,10 @@
 					event.value = response.data; // Сохраняем данные мероприятия
 
 					// Проверяем, является ли текущий пользователь автором мероприятия
-					const currentUser = JSON.parse(
+					const currentId = JSON.parse(
 						atob(localStorage.getItem("token").split(".")[1]),
-					).login; // Получаем логин из токена
-					isCreator.value = currentUser === event.value.createdBy;
+					).userId; // Получаем id из токена
+					userId.value = currentId === event.value.userId;
 				} catch (error) {
 					console.error("Ошибка при получении мероприятия:", error);
 				}
@@ -70,7 +71,8 @@
 			const deleteEvent = async () => {
 				try {
 					await axios.delete(
-						`http://localhost:3000/events/${route.params.id}`,
+						//`http://localhost:3000/events/${route.params.id}`,
+						`http://176.32.33.100:3000/events/${route.params.id}`,
 						{
 							headers: {
 								Authorization: `Bearer ${localStorage.getItem("token")}`, // Отправляем токен для авторизации
@@ -86,7 +88,7 @@
 
 			getEvent(); // Получаем данные при загрузке компонента
 
-			return { event, goBack, goToEdit, deleteEvent, isCreator };
+			return { event, goBack, goToEdit, deleteEvent, userId };
 		},
 	};
 </script>

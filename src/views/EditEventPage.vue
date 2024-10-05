@@ -55,7 +55,8 @@
 				const eventId = route.params.id;
 				try {
 					const response = await axios.get(
-						`http://localhost:3000/events/${eventId}`,
+						//`http://localhost:3000/events/${eventId}`,
+						`http://176.32.33.100:3000/events/${eventId}`,
 					);
 					const event = response.data;
 					title.value = event.title;
@@ -70,7 +71,8 @@
 			const updateEvent = async () => {
 				const eventId = route.params.id;
 				try {
-					await axios.put(`http://localhost:3000/events/${eventId}`, {
+					//await axios.put(`http://localhost:3000/events/${eventId}`, {
+					await axios.put(`http://176.32.33.100:3000/events/${eventId}`, {
 						title: title.value,
 						description: description.value,
 						date: date.value,
