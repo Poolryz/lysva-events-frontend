@@ -95,7 +95,8 @@
 
 			const fetchEvents = async () => {
 				try {
-					const response = await axios.get("http://localhost:3000/events");
+					//const response = await axios.get("http://localhost:3000/events");
+					const response = await axios.get("http://176.32.33.100:3000/events");
 					events.value = response.data;
 				} catch (error) {
 					console.error("Ошибка при получении мероприятий:", error);
