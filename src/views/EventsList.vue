@@ -27,8 +27,8 @@
 				</div>
 
 				<!-- Список мероприятий -->
-				<div v-if="filteredEvents.length">
-					<ul class="flex justify-betwen flex-wrap font">
+				<div v-if="filteredEvents && filteredEvents.length">
+					<ul class="flex justify-between flex-wrap font">
 						<li
 							v-for="event in filteredEvents"
 							:key="event._id"
@@ -38,7 +38,7 @@
 							<img
 								class="w-fit"
 								src="https://avatars.mds.yandex.net/get-ydo/2793943/2a0000017352e4846fc9fd47159986496caf/diploma"
-								alt=""
+								alt="Event"
 							/>
 							<h3 class="text-xl font-semibold text-center my-2">
 								{{ event.title }}
@@ -60,8 +60,6 @@
 
 <script>
 	import { mapState, mapGetters, mapMutations } from "vuex";
-	import axios from "axios";
-	import { ref, onMounted } from "vue";
 	import { useRouter } from "vue-router";
 
 	export default {
@@ -85,31 +83,12 @@
 			updateSortOrder(event) {
 				this.SET_SORT_ORDER(event.target.value);
 			},
+			goToEvent(id) {
+				this.$router.push({ name: "EventPage", params: { id } });
+			},
 		},
 		created() {
 			this.$store.dispatch("fetchEvents");
-		},
-		setup() {
-			const events = ref([]);
-			const router = useRouter();
-
-			const fetchEvents = async () => {
-				try {
-					//const response = await axios.get("http://localhost:3000/events");
-					const response = await axios.get("http://176.32.33.100:3000/events");
-					events.value = response.data;
-				} catch (error) {
-					console.error("Ошибка при получении мероприятий:", error);
-				}
-			};
-
-			const goToEvent = (id) => {
-				router.push({ name: "EventPage", params: { id } }); // Переход на страницу мероприятия
-			};
-
-			onMounted(fetchEvents); // Получаем события при монтировании компонента
-
-			return { events, goToEvent };
 		},
 	};
 </script>
