@@ -72,7 +72,7 @@
 				try {
 					await axios.delete(
 						//`http://localhost:3000/events/${route.params.id}`,
-						`http://176.32.33.100:3000/events/${route.params.id}`,
+						`http://176.32.33.100:3000/events/${eventId}`,
 						{
 							headers: {
 								Authorization: `Bearer ${localStorage.getItem("token")}`, // Отправляем токен для авторизации
