@@ -27,7 +27,7 @@
 				</div>
 
 				<!-- Список мероприятий -->
-				<div v-if="filteredEvents && filteredEvents.length">
+				<div v-if="filteredEvents.length">
 					<ul class="flex justify-between flex-wrap font">
 						<li
 							v-for="event in filteredEvents"
