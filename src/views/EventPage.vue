@@ -8,8 +8,8 @@
 			Назад
 		</button>
 
-		<!-- Отображаем кнопки только если текущий пользователь является автором мероприятия -->
-		<div v-if="userId">
+		<!-- Отображаем кнопки только если текущий пользователь авторизован и является автором мероприятия -->
+		<div v-if="isAuthorized && userId">
 			<button
 				@click="goToEdit"
 				class="bg-yellow-500 text-white p-2 rounded mr-2"
@@ -31,30 +31,42 @@
 	export default {
 		name: "EventPage",
 		setup() {
-			const event = ref({});
+			const event = ref({}); // Данные мероприятия
 			const route = useRoute();
 			const router = useRouter();
 			const userId = ref(false); // Проверка, является ли текущий пользователь автором
+			const isAuthorized = ref(false); // Проверка, авторизован ли пользователь
+
+			// Функция для получения и декодирования токена
+			const getTokenData = () => {
+				const token = localStorage.getItem("token");
+				if (token) {
+					try {
+						const payload = JSON.parse(atob(token.split(".")[1]));
+						return payload;
+					} catch (error) {
+						console.error("Ошибка при декодировании токена:", error);
+						return null;
+					}
+				}
+				return null;
+			};
 
 			const getEvent = async () => {
 				const eventId = route.params.id; // Получаем ID из параметров маршрута
 				try {
 					const response = await axios.get(
 						//`http://localhost:3000/events/${eventId}`,
-						`http://176.32.33.100/events/${eventId}`,
-						{
-							headers: {
-								Authorization: `Bearer ${localStorage.getItem("token")}`, // Отправляем токен
-							},
-						},
+						`http://176.32.33.100:3000/events/${eventId}`,
 					);
 					event.value = response.data; // Сохраняем данные мероприятия
 
-					// Проверяем, является ли текущий пользователь автором мероприятия
-					const currentId = JSON.parse(
-						atob(localStorage.getItem("token").split(".")[1]),
-					).userId; // Получаем id из токена
-					userId.value = currentId === event.value.userId;
+					// Проверяем токен и авторство
+					const tokenData = getTokenData();
+					if (tokenData) {
+						userId.value = tokenData.userId === event.value.userId; // Проверка авторства
+						isAuthorized.value = true; // Устанавливаем, что пользователь авторизован
+					}
 				} catch (error) {
 					console.error("Ошибка при получении мероприятия:", error);
 				}
@@ -72,7 +84,7 @@
 				try {
 					await axios.delete(
 						//`http://localhost:3000/events/${route.params.id}`,
-						`http://176.32.33.100:3000/events/${eventId}`,
+						`http://176.32.33.100:3000/events/${route.params.id}`,
 						{
 							headers: {
 								Authorization: `Bearer ${localStorage.getItem("token")}`, // Отправляем токен для авторизации
@@ -88,7 +100,7 @@
 
 			getEvent(); // Получаем данные при загрузке компонента
 
-			return { event, goBack, goToEdit, deleteEvent, userId };
+			return { event, goBack, goToEdit, deleteEvent, userId, isAuthorized };
 		},
 	};
 </script>
