@@ -4,6 +4,7 @@ import CreateEvent from "../views/CreateEvent.vue";
 import LoginPage from "../views/LoginPage.vue";
 import EventPage from "../views/EventPage.vue";
 import EditEventPage from "../views/EditEventPage.vue";
+import ProfilePage from "../views/ProfilePage.vue"
 
 const routes = [
 	{ path: "/", component: EventsList },
@@ -34,6 +35,11 @@ const routes = [
 		path: "/event/:id/edit",
 		name: "EditEventPage",
 		component: EditEventPage, // Этот компонент ты должен создать для редактирования
+	},
+	{
+		path: "/profile",
+		name: "ProfilePage",
+		component: ProfilePage, // Этот компонент ты должен создать для редактирования
 	},
 ];
 

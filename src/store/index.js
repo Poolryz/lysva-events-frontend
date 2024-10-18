@@ -1,6 +1,6 @@
 import { createStore } from "vuex";
 import axios from "axios";
-
+import urlChanger from "../services/constElement";
 const store = createStore({
 	state: {
 		events: [],
@@ -26,8 +26,8 @@ const store = createStore({
 		async fetchEvents({ commit }) {
 			commit("SET_LOADING", true);
 			try {
-				//const response = await axios.get("http://localhost:3000/events");
-				const response = await axios.get("http://176.32.33.100:3000/events");
+				const response = await axios.get(`${urlChanger()}events`);
+				//const response = await axios.get("http://176.32.33.100:3000/events");
 				commit("SET_EVENTS", response.data);
 			} catch (error) {
 				console.error("Ошибка при получении мероприятий:", error);
