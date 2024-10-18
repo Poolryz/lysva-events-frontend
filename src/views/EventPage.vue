@@ -63,7 +63,7 @@ export default {
 		const getEvent = async () => {
 			const eventId = route.params.id; // Получаем ID из параметров маршрута
 			try {
-				const response = await axios.get(`http://localhost:3000/events/${eventId}`);
+				const response = await axios.get(`${urlChanger} ${eventId}`);
 				event.value = response.data; // Сохраняем данные мероприятия
 
 				// Проверяем токен и авторство
