@@ -1,6 +1,6 @@
 const urls={
     localhost: "http://localhost:3000/",
-    public: "http://lysvalife.ru/"
+    public: "http://api.lysvalife.ru/"
 }
 
 
