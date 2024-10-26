@@ -1,43 +1,55 @@
 <template>
-	<div class="container mx-auto px-4 py-6">
-		<img :src="urlChanger() + event.image" alt="Event Image">
-		<h1 class="text-2xl font-bold mb-4">{{ event.title }}</h1>
-		<p class="mb-2"><strong>Описание:</strong> {{ event.description }}</p>
-		<p class="mb-2"><strong>Дата:</strong> {{ formatDate(event.date) }}</p>
-		<p class="mb-2"><strong>Место:</strong> {{ event.location }}</p>
-		<button @click="goBack" class="bg-blue-500 text-white p-2 rounded mb-4">
-			Назад
-		</button>
+	<div class="container px-20 py-20 m-auto">
+		<div class="body flex flex-col items-center">
+			<img class="m-auto" :src="urlChanger() + event.image" alt="Event Image">
+			<h2 class="text-2xl font-bold mb-4 my-5">{{ event.title }}</h2>
+			<div class="mb-2 flex">
+				<CalendarIcon class="w-5 h-5 text-gray-700 mr-2" /> {{ formatDate(event.date) }}</div>
+			<div class="my-2 flex">
+				<MapPinIcon class="w-5 h-5 text-gray-700 mr-2" />{{ event.location }}
+			</div>
+			<p class="mb-2 w-full"> {{ event.description }}</p>
+			<button @click="goBack" class="bg-blue-500 text-white p-2 rounded mb-4">
+				Назад
+			</button>
 
-		<!-- Отображаем кнопки только если текущий пользователь авторизован и является автором мероприятия -->
-		<div v-if="isAuthorized && userId">
-			<button @click="goToEdit" class="bg-yellow-500 text-white p-2 rounded mr-2">
-				Редактировать
-			</button>
-			<button @click="deleteEvent" class="bg-red-500 text-white p-2 rounded">
-				Удалить
-			</button>
+			<!-- Отображаем кнопки только если текущий пользователь авторизован и является автором мероприятия -->
+			<div v-if="isAuthorized && userId">
+				<button @click="goToEdit" class="bg-yellow-500 text-white p-2 rounded mr-2">
+					Редактировать
+				</button>
+				<button @click="deleteEvent" class="bg-red-500 text-white p-2 rounded">
+					Удалить
+				</button>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
 import axios from "axios";
-import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
 import urlChanger from "../services/constElement";
+import { MapPinIcon,CalendarIcon } from '@heroicons/vue/24/solid';
 
 export default {
 	name: "EventPage",
-	setup() {
-		const event = ref({}); // Данные мероприятия
-		const route = useRoute();
-		const router = useRouter();
-		const userId = ref(false); // Проверка, является ли текущий пользователь автором
-		const isAuthorized = ref(false); // Проверка, авторизован ли пользователь
+	components: {
+    MapPinIcon,
+	CalendarIcon     
+  },
 
-		// Функция для получения и декодирования токена
-		const getTokenData = () => {
+	data() {
+		return {
+			event: {}, // Данные мероприятия
+			userId: null, // ID пользователя
+			isAuthorized: false, // Проверка, авторизован ли пользователь
+		};
+	},
+	
+	methods: {
+		urlChanger,
+		// Получаем данные токена
+		getTokenData() {
 			const token = localStorage.getItem("token");
 			if (token) {
 				try {
@@ -49,67 +61,68 @@ export default {
 				}
 			}
 			return null;
-		};
-
-		const formatDate = (dateString) => {
+		},
+		// Форматирование даты
+		formatDate(dateString) {
 			if (!dateString) return '';
 			const date = new Date(dateString);
-			const day = String(date.getDate()).padStart(2, '0');
-			const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
-			const year = date.getFullYear();
-			return `${day}.${month}.${year}`; // Форматирование в dd.MM.yyyy
-		};
+			const day = String(date.getDate()).padStart(2);
+			const monthNames = [
+				'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+				'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+			];
+			const month = monthNames[date.getMonth()]; // Получаем название месяца
 
-		const getEvent = async () => {
-			const eventId = route.params.id; // Получаем ID из параметров маршрута
+			const year = date.getFullYear();
+			return `${day} ${month} ${year}`; // Форматирование в dd.MM.yyyy
+		},
+		// Получаем данные мероприятия
+		async getEvent() {
+			const eventId = this.$route.params.id; // Получаем ID из параметров маршрута
 			try {
 				const response = await axios.get(`${urlChanger()}events/${eventId}`);
-				event.value = response.data; // Сохраняем данные мероприятия
+				this.event = response.data; // Сохраняем данные мероприятия
 
 				// Проверяем токен и авторство
-				const tokenData = getTokenData();
+				const tokenData = this.getTokenData();
 				if (tokenData) {
-					userId.value = tokenData.userId === event.value.userId; // Проверка авторства
-					isAuthorized.value = true; // Устанавливаем, что пользователь авторизован
+					this.userId = tokenData.userId === this.event.userId; // Проверка авторства
+					this.isAuthorized = true; // Устанавливаем, что пользователь авторизован
 				}
 			} catch (error) {
 				alert("Ошибка при получении мероприятия. Попробуйте еще раз."); // Добавлено сообщение об ошибке
 				console.error("Ошибка при получении мероприятия:", error);
 			}
-		};
-
-		const goBack = () => {
-			router.go(-1); // Вернуться на предыдущую страницу
-		};
-
-		const goToEdit = () => {
-			router.push({ name: "EditEventPage", params: { id: route.params.id } }); // Переход на страницу редактирования
-		};
-
-		const deleteEvent = async () => {
+		},
+		// Переход назад
+		goBack() {
+			this.$router.go(-1);
+		},
+		// Переход на страницу редактирования
+		goToEdit() {
+			this.$router.push({ name: "EditEventPage", params: { id: this.$route.params.id } });
+		},
+		// Удаление мероприятия
+		async deleteEvent() {
 			if (confirm("Вы уверены, что хотите удалить это мероприятие?")) {
 				try {
-					await axios.delete(`${urlChanger()}events/${route.params.id}`, {
+					await axios.delete(`${urlChanger()}events/${this.$route.params.id}`, {
 						headers: {
 							Authorization: `Bearer ${localStorage.getItem("token")}`, // Отправляем токен для авторизации
 						},
 					});
 					alert("Мероприятие удалено");
-					router.push("/"); // Переход на список мероприятий после удаления
+					this.$router.push("/"); // Переход на список мероприятий после удаления
 				} catch (error) {
 					alert("Ошибка при удалении мероприятия. Попробуйте еще раз."); // Добавлено сообщение об ошибке
 					console.error("Ошибка при удалении мероприятия:", error);
 				}
 			}
-		};
-
-		onMounted(getEvent); // Получаем данные при загрузке компонента
-
-		return { event, goBack, goToEdit, deleteEvent, userId, isAuthorized, formatDate };
+		},
 	},
-	methods: {
-		urlChanger
-	}
+	created() {
+		this.getEvent(); // Получаем данные при загрузке компонента
+	},
 };
 </script>
 

@@ -5,13 +5,13 @@
 				<h2 class="text-2xl font-bold mb-4">Все мероприятия</h2>
 
 				<!-- Поле для поиска -->
-				<input v-model="searchQuery" @input="updateSearch" class="border rounded p-2 mb-4 w-full"
-					placeholder="Поиск мероприятий" type="text" />
+				<input v-model="searchQuery" class="border rounded p-2 mb-4 w-full" placeholder="Поиск мероприятий"
+					type="text" />
 
 				<!-- Переключатель сортировки -->
 				<div class="mb-4">
 					<label class="mr-2">Сортировка:</label>
-					<select v-model="sortOrder" @change="updateSortOrder" class="border p-2 rounded">
+					<select v-model="sortOrder" class="border p-2 rounded">
 						<option value="asc">По возрастанию (ближайшие)</option>
 						<option value="desc">По убыванию (поздние)</option>
 					</select>
@@ -30,29 +30,16 @@
 						</div>
 						<div class="px-6 py-4">
 							<div class="flex items-center">
-								<svg class="w-6 h-6 text-gray-500 mr-2" fill="none" stroke="currentColor"
-									viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M17.657 16.657L13 12m0 0L8.343 16.657M13 12l4.657-4.657M13 12L8.343 7.343M21 21L3 3">
-									</path>
-								</svg>
+								<MapPinIcon class="w-5 h-5 text-gray-700 mr-2" />
 								<p class="text-gray-600">{{ event.location }}</p>
 							</div>
 							<div class="flex items-center mt-2">
-								<svg class="w-6 h-6 text-gray-500 mr-2" fill="none" stroke="currentColor"
-									viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M8 7h8">
-									</path>
-								</svg>
+								<CalendarIcon class="w-5 h-5 text-gray-700 mr-2" />
 								<p class="text-gray-600">{{ formatDate(event.date) }}</p>
 							</div>
 						</div>
 					</div>
 				</div>
-
-
-
 
 				<div v-else>
 					<p>Мероприятий пока нет.</p>
@@ -63,17 +50,48 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from "vuex";
+import axios from "axios";
 import urlChanger from "../services/constElement";
+import { MapPinIcon, CalendarIcon } from '@heroicons/vue/24/solid';
 
 export default {
+	components: {
+		MapPinIcon,
+		CalendarIcon
+	},
+	data() {
+		return {
+			events: [],
+			searchQuery: "",
+			sortOrder: "asc", // 'asc' для ближайших событий или 'desc' для обратного порядка
+			loading: false,
+		};
+	},
 	computed: {
-		...mapState(["searchQuery", "sortOrder"]),
-		...mapGetters(["filteredEvents"]),
+		filteredEvents() {
+			return this.events
+				.filter((event) =>
+					event.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+				)
+				.sort((a, b) => {
+					const dateA = new Date(a.date);
+					const dateB = new Date(b.date);
+					return this.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+				});
+		},
 	},
 	methods: {
-		urlChanger,
-		...mapMutations(["SET_SEARCH_QUERY", "SET_SORT_ORDER"]),
+		async fetchEvents() {
+			this.loading = true;
+			try {
+				const response = await axios.get(`${urlChanger()}events`);
+				this.events = response.data;
+			} catch (error) {
+				console.error("Ошибка при получении мероприятий:", error);
+			} finally {
+				this.loading = false;
+			}
+		},
 		formatDate(dateString) {
 			const date = new Date(dateString);
 			return date.toLocaleDateString("ru-RU", {
@@ -82,18 +100,13 @@ export default {
 				year: "numeric",
 			});
 		},
-		updateSearch(event) {
-			this.SET_SEARCH_QUERY(event.target.value);
-		},
-		updateSortOrder(event) {
-			this.SET_SORT_ORDER(event.target.value);
-		},
 		goToEvent(id) {
 			this.$router.push({ name: "EventPage", params: { id } });
 		},
+		urlChanger,
 	},
 	created() {
-		this.$store.dispatch("fetchEvents");
+		this.fetchEvents();
 	},
 };
 </script>

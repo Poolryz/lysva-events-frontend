@@ -24,7 +24,6 @@
 
 <script>
 	import axios from "axios";
-	import { mapMutations } from "vuex";
 import urlChanger from "../services/constElement";
 	export default {
 		name: "LoginPage",
@@ -36,7 +35,6 @@ import urlChanger from "../services/constElement";
 			};
 		},
 		methods: {
-			...mapMutations(["setUser"]),
 			async loginSubmit() {
 				try {
 					// Отправляем запрос на сервер с логином и паролем
