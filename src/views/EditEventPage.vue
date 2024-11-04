@@ -9,6 +9,7 @@
 			<input v-model="date" type="date" class="border p-2 w-full rounded" required />
 			<input v-model="location" type="text" placeholder="Место" class="border p-2 w-full rounded" required />
 			<input type="file" @change="onFileChange" class="border p-2 rounded" accept="image/*">
+			<img class="w-20" :src="urlChanger() + image" alt="">
 			<button type="submit" class="bg-blue-500 text-white p-2 rounded">
 				Обновить мероприятие
 			</button>
@@ -40,6 +41,7 @@ export default {
 		};
 	},
 	methods: {
+		urlChanger,
 		// Метод для изменения файла изображения
 		onFileChange(event) {
 			this.image = event.target.files[0];
@@ -54,6 +56,7 @@ export default {
 				this.description = event.description;
 				this.date = event.date.split('T')[0]; // Преобразуем дату в нужный формат
 				this.location = event.location;
+				this.image = event.image
 			} catch (error) {
 				alert("Ошибка при получении мероприятия. Попробуйте еще раз.");
 				console.error("Ошибка при получении мероприятия:", error);
@@ -62,6 +65,12 @@ export default {
 		// Обновление мероприятия
 		async updateEvent() {
 			const eventId = this.route.params.id;
+			const token = localStorage.getItem('token');
+
+			if (!token) {
+				console.error('Токен отсутствует'); // Логируем, если токена нет
+				return;
+			}
 			try {
 				// Создаем объект FormData для отправки данных, включая изображение
 				const formData = new FormData();
@@ -75,6 +84,7 @@ export default {
 				// Отправляем запрос на обновление с FormData
 				await axios.put(`${urlChanger()}events/${eventId}`, formData, {
 					headers: {
+						Authorization: `Bearer ${token}`, // Токен должен быть здес
 						"Content-Type": "multipart/form-data",
 					},
 				});
