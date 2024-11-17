@@ -1,18 +1,15 @@
-const urls={
-    localhost: "http://localhost:3000/",
-    public: "https://api.lysvalife.ru/"
+const urls = {
+  localhost: 'http://localhost:3000/',
+  public: 'https://api.lysvalife.ru/',
+};
+
+function urlChanger() {
+  let dev = false;
+  if (dev) {
+    return urls.localhost;
+  } else {
+    return urls.public;
+  }
 }
 
-
-function urlChanger(){
-    let dev = true
-    if (dev){
-        return urls.localhost
-    }
-else{
-    return urls.public
-}
-
-}
-
-export default urlChanger
+export default urlChanger;
