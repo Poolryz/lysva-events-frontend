@@ -5,7 +5,7 @@ const urls={
 
 
 function urlChanger(){
-    let dev = false
+    let dev = true
     if (dev){
         return urls.localhost
     }
